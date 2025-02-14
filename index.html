@@ -10,7 +10,7 @@
         <source id="audioSource" src="" type="audio/mpeg">
     </audio>
     <script>
-        // Function to extract the query parameter 'src' from the URL
+        // Function to get URL parameter by name
         function getURLParameter(name) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(name);
@@ -21,7 +21,9 @@
             return fetch(url)
                 .then(response => response.text())
                 .then(text => {
-                  
+                    // Find the first valid URL in the fetched content
+                    const urlMatch = text.match(/https?:\/\/[^\s"<>()]+/);
+                    return urlMatch ? urlMatch[0] : null;
                 })
                 .catch(err => {
                     console.error('Error fetching the audio URL:', err);
@@ -29,33 +31,37 @@
                 });
         }
 
-        // Main function to handle the redirect
+        // Main function to handle fetching and playing audio
         function handleRedirect() {
-            const srcUrl = getURLParameter('src'); // Get the 'src' URL parameter
+            let srcUrl = getURLParameter('src');
+            let iid = getURLParameter('iid'); // Check if 'iid' is in the URL
+
+            if (iid) {
+                // Construct the full URL if 'iid' is provided
+                srcUrl = `https://www.chabad.org/multimedia/mediaplayer/flash_media_player_content.xml.asp?what=get&aid=&iid=${iid}`;
+            }
 
             if (srcUrl) {
-                // If a 'src' URL is provided
                 fetchAudioUrl(srcUrl).then(audioUrl => {
                     if (audioUrl) {
                         // Set the source and play the audio
                         const audioElement = document.getElementById("myAudio");
                         const audioSource = document.getElementById("audioSource");
                         audioSource.setAttribute("src", audioUrl);
-                        audioElement.load(); // Load the new audio source
-                        audioElement.play(); // Start playing the audio
+                        audioElement.load(); // Reload the audio source
+                        audioElement.play().catch(err => console.warn("Autoplay blocked:", err));
                     } else {
                         console.error('No valid audio URL found');
                         alert('Error: No valid audio URL found.');
                     }
                 });
             } else {
-                // If no 'src' URL is provided, show an error
-                console.error('No src parameter in the URL');
-                alert('Error: No src parameter in the URL.');
+                console.error('No valid parameter found in the URL');
+                alert('Error: No valid parameter found in the URL.');
             }
         }
 
-        // Wait for the page to load and handle the redirect
+        // Run the script when the page loads
         window.onload = handleRedirect;
     </script>
 </body>
