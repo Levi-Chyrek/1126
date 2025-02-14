@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirect to Audio</title>
+</head>
+<body>
+    <audio id="myAudio" controls autoplay>
+        <source id="audioSource" src="" type="audio/mpeg">
+    </audio>
+    <script>
+        // Function to extract the query parameter 'src' from the URL
+        function getURLParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Function to fetch the actual audio URL from the non-audio URL
+        function fetchAudioUrl(url) {
+            return fetch(url)
+                .then(response => response.text())
+                .then(text => {
+                    const audioUrlMatch = text.match(/https:\/\/http-vod-cdn\.chabad\.org\/api\/utils\/file\/[a-zA-Z0-9%-]+\.mp3\?id=[^"]+/);
+                    return audioUrlMatch ? audioUrlMatch[0] : null;
+                })
+                .catch(err => {
+                    console.error('Error fetching the audio URL:', err);
+                    return null;
+                });
+        }
+
+        // Main function to handle the redirect
+        function handleRedirect() {
+            const srcUrl = getURLParameter('src'); // Get the 'src' URL parameter
+
+            if (srcUrl) {
+                // If a 'src' URL is provided
+                fetchAudioUrl(srcUrl).then(audioUrl => {
+                    if (audioUrl) {
+                        // Set the source and play the audio
+                        const audioElement = document.getElementById("myAudio");
+                        const audioSource = document.getElementById("audioSource");
+                        audioSource.setAttribute("src", audioUrl);
+                        audioElement.load(); // Load the new audio source
+                        audioElement.play(); // Start playing the audio
+                    } else {
+                        console.error('No valid audio URL found');
+                        alert('Error: No valid audio URL found.');
+                    }
+                });
+            } else {
+                // If no 'src' URL is provided, show an error
+                console.error('No src parameter in the URL');
+                alert('Error: No src parameter in the URL.');
+            }
+        }
+
+        // Wait for the page to load and handle the redirect
+        window.onload = handleRedirect;
+    </script>
+</body>
+</html>
