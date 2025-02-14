@@ -31,10 +31,11 @@
                 });
         }
 
-        // Main function to handle fetching and playing audio
+        // Main function to handle fetching and playing audio, and possibly redirecting
         function handleRedirect() {
             let srcUrl = getURLParameter('src');
             let iid = getURLParameter('iid'); // Check if 'iid' is in the URL
+            const redirectUrl = getURLParameter('redirect'); // Check if 'redirect' is in the URL
 
             if (iid) {
                 // Construct the full URL if 'iid' is provided
@@ -44,12 +45,17 @@
             if (srcUrl) {
                 fetchAudioUrl(srcUrl).then(audioUrl => {
                     if (audioUrl) {
-                        // Set the source and play the audio
-                        const audioElement = document.getElementById("myAudio");
-                        const audioSource = document.getElementById("audioSource");
-                        audioSource.setAttribute("src", audioUrl);
-                        audioElement.load(); // Reload the audio source
-                        audioElement.play().catch(err => console.warn("Autoplay blocked:", err));
+                        if (redirectUrl) {
+                            // Redirect to the audio URL if the 'redirect' parameter is present
+                            window.location.href = audioUrl;
+                        } else {
+                            // Set the source and play the audio if no 'redirect' is requested
+                            const audioElement = document.getElementById("myAudio");
+                            const audioSource = document.getElementById("audioSource");
+                            audioSource.setAttribute("src", audioUrl);
+                            audioElement.load(); // Reload the audio source
+                            audioElement.play().catch(err => console.warn("Autoplay blocked:", err));
+                        }
                     } else {
                         console.error('No valid audio URL found');
                         alert('Error: No valid audio URL found.');
