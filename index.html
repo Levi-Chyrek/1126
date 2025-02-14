@@ -21,8 +21,7 @@
             return fetch(url)
                 .then(response => response.text())
                 .then(text => {
-                    const audioUrlMatch = text.match(/https:\/\/http-vod-cdn\.chabad\.org\/api\/utils\/file\/[a-zA-Z0-9%-]+\.mp3\?id=[^"]+/);
-                    return audioUrlMatch ? audioUrlMatch[0] : null;
+                  
                 })
                 .catch(err => {
                     console.error('Error fetching the audio URL:', err);
