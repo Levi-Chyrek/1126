@@ -39,11 +39,12 @@
                 });
         }
 
-        // Main function to handle fetching and playing audio, and possibly redirecting
+        // Main function to handle fetching, playing, and redirecting
         function handleRedirect() {
             let srcUrl = getURLParameter('src');
             let iid = getURLParameter('iid'); // Check if 'iid' is in the URL
             const redirectUrl = getURLParameter('redirect'); // Check if 'redirect' is in the URL
+            const speed = parseFloat(getURLParameter('speed')); // Get speed parameter
 
             if (iid) {
                 // Construct the full URL if 'iid' is provided
@@ -62,6 +63,12 @@
                             const audioSource = document.getElementById("audioSource");
                             audioSource.setAttribute("src", audioUrl);
                             audioElement.load(); // Reload the audio source
+                            
+                            // Set playback speed if provided and valid
+                            if (!isNaN(speed) && speed > 0) {
+                                audioElement.playbackRate = speed;
+                            }
+
                             audioElement.play().catch(err => console.warn("Autoplay blocked:", err));
                         }
                     } else {
