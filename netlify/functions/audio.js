@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-export async function handler(event, context) {
+export async function handler(event) {
   const { src, iid } = event.queryStringParameters;
 
   let srcUrl = src;
@@ -12,7 +12,10 @@ export async function handler(event, context) {
     if (!match) {
       return {
         statusCode: 404,
-        body: "Audio not found"
+        headers: {
+          'Content-Type': 'text/plain'
+        },
+        body: "Audio URL not found in XML."
       };
     }
     srcUrl = match[0];
@@ -21,13 +24,17 @@ export async function handler(event, context) {
   if (!srcUrl) {
     return {
       statusCode: 400,
-      body: "No audio source provided"
+      headers: {
+        'Content-Type': 'text/plain'
+      },
+      body: "Missing audio source."
     };
   }
 
   try {
     const audioRes = await fetch(srcUrl);
-    const buffer = await audioRes.arrayBuffer();
+    const arrayBuffer = await audioRes.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
 
     return {
       statusCode: 200,
@@ -35,13 +42,16 @@ export async function handler(event, context) {
         'Content-Type': 'audio/mpeg',
         'Content-Disposition': 'inline; filename="audio.mp3"'
       },
-      body: Buffer.from(buffer).toString('base64'),
+      body: base64,
       isBase64Encoded: true
     };
-  } catch (err) {
+  } catch (error) {
     return {
       statusCode: 500,
-      body: 'Error streaming audio'
+      headers: {
+        'Content-Type': 'text/plain'
+      },
+      body: "Failed to fetch or stream audio."
     };
   }
 }
