@@ -1,0 +1,7 @@
+[functions]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/audio"
+  to = "/.netlify/functions/audio"
+  status = 200
